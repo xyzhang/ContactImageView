@@ -27,7 +27,6 @@ public class ContactImageView extends ImageView {
         super(context, attrs, defStyle);
     }
 
-
     // Helpers to set image by contact address book id
     public void setImageContact(long contactId) {
         setImage(new ContactImage(contactId));
