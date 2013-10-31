@@ -9,11 +9,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ContactImageView extends ImageView {
-    private static final int LOADING_THREADS = 4;
-    private static ExecutorService threadPool = Executors.newFixedThreadPool(LOADING_THREADS);
 
-    private ContactImageTask currentTask;
-
+	private String key;
 
     public ContactImageView(Context context) {
         super(context);
@@ -29,88 +26,61 @@ public class ContactImageView extends ImageView {
 
     // Helpers to set image by contact address book id
     public void setImageContact(long contactId) {
+    	key=String.valueOf(contactId);
         setImage(new ContactImage(contactId));
     }
 
     public void setImageContact(long contactId, final Integer fallbackResource) {
-        setImage(new ContactImage(contactId), fallbackResource);
+    	key=String.valueOf(contactId);
+    	setImage(new ContactImage(contactId), fallbackResource);
     }
 
     public void setImageContact(long contactId, final Integer fallbackResource, final Integer loadingResource) {
-        setImage(new ContactImage(contactId), fallbackResource, fallbackResource);
+    	key=String.valueOf(contactId);
+    	setImage(new ContactImage(contactId), fallbackResource, fallbackResource);
     }
 
     // Helpers to set image by contact phone
     public void setImageContact(String phone) {
+    	key=String.valueOf(phone);
         setImage(new ContactImage(phone));
     }
 
     public void setImageContact(String phone, final Integer fallbackResource) {
-        setImage(new ContactImage(phone), fallbackResource);
+    	key=String.valueOf(phone);
+    	setImage(new ContactImage(phone), fallbackResource);
     }
 
     public void setImageContact(String phone, final Integer fallbackResource, final Integer loadingResource) {
-        setImage(new ContactImage(phone), fallbackResource, fallbackResource);
+    	key=String.valueOf(phone);
+    	setImage(new ContactImage(phone), fallbackResource, fallbackResource);
     }
     // Set image using ContactImage object
     private void setImage(final ContactImage image) {
         setImage(image, null, null, null);
     }
 
-    private void setImage(final ContactImage image, final ContactImageTask.OnCompleteListener completeListener) {
-        setImage(image, null, null, completeListener);
-    }
+//    private void setImage(final ContactImage image, final ContactImageTask.OnCompleteListener completeListener) {
+//        setImage(image, null, null, completeListener);
+//    }
 
     private void setImage(final ContactImage image, final Integer fallbackResource) {
         setImage(image, fallbackResource, fallbackResource, null);
     }
 
-    private void setImage(final ContactImage image, final Integer fallbackResource, ContactImageTask.OnCompleteListener completeListener) {
+    public void setImage(final ContactImage image, final Integer fallbackResource, ContactImageTask.OnCompleteListener completeListener) {
         setImage(image, fallbackResource, fallbackResource, completeListener);
     }
 
     private void setImage(final ContactImage image, final Integer fallbackResource, final Integer loadingResource) {
         setImage(image, fallbackResource, loadingResource, null);
     }
-
+    
+    
     private void setImage(final ContactImage image, final Integer fallbackResource, final Integer loadingResource, final ContactImageTask.OnCompleteListener completeListener) {
-        // Set a loading resource
-        if(loadingResource != null){
-            setImageResource(loadingResource);
-        }
-
-        // Cancel any existing tasks for this image view
-        if(currentTask != null) {
-            currentTask.cancel();
-            currentTask = null;
-        }
-
-        // Set up the new task
-        currentTask = new ContactImageTask(getContext(), image);
-        currentTask.setOnCompleteHandler(new ContactImageTask.OnCompleteHandler() {
-            @Override
-            public void onComplete(Bitmap bitmap) {
-                if(bitmap != null) {
-                    setImageBitmap(bitmap);
-                } else { 
-                    // Set fallback resource
-                    if(fallbackResource != null) {
-                        setImageResource(fallbackResource);
-                    }
-                }
-
-                if(completeListener != null){
-                    completeListener.onComplete();
-                }
-            }
-        });
-
-        // Run the task in a threadpool
-        threadPool.execute(currentTask);
+    	 CacheContainer cacheContainer=CacheContainer.getIntance();
+    	 cacheContainer.setImage(ContactImageView.this, key, getContext(), image, fallbackResource, loadingResource, completeListener);
     }
 
-    public static void cancelAllTasks() {
-        threadPool.shutdownNow();
-        threadPool = Executors.newFixedThreadPool(LOADING_THREADS);
-    }
+    
 }

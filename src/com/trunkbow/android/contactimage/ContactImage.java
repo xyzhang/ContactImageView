@@ -2,15 +2,16 @@ package com.trunkbow.android.contactimage;
 
 import java.io.InputStream;
 
-import android.content.ContentUris;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.PhoneLookup;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.util.Log;
 
 public class ContactImage {
 	private long contactId;
@@ -28,12 +29,13 @@ public class ContactImage {
 	public Bitmap getBitmap(Context context) {
 		Bitmap bitmap = null;
 
+		Log.d("ContactImage", "ContactImage_phone:"+phone);
 		if (phone != null) {
-			Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
+			Uri uri = Uri.withAppendedPath(Phone.CONTENT_FILTER_URI,
 					Uri.encode(phone));
-			// PhoneLookup._ID 相当于联系人ID
+			// PhoneLookup._ID
 			Cursor c = context.getContentResolver().query(uri,
-					new String[] { PhoneLookup._ID }, null, null, null);
+					new String[] { Phone.CONTACT_ID }, null, null, null);
 			if (c.moveToFirst()) {
 				contactId = c.getLong(0);
 			}
@@ -54,6 +56,7 @@ public class ContactImage {
 			e.printStackTrace();
 		}
 
+		Log.d("ContactImage", "ContactImage_bitmap:"+(bitmap==null));
 		return bitmap;
 	}
 }
